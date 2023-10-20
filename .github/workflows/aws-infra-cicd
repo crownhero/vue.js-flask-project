@@ -24,10 +24,10 @@ jobs:
         env:
           REGISTRY: ${{ secrets.AWS_REP_URL }}
           REPOSITORY: vue-flask
-          IMAGE_TAG: latest
+          IMAGE_TAG: {{ github.sha }}
         run: |-
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG Dockerfile
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG Dockerfile_1
       - name: Deploy docker image to EC2
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
