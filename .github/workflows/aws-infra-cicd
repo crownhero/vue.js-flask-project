@@ -9,6 +9,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   PRIVATE_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
   SERVER_PUBLIC_IP: ${{ secrets.AWS_PUBLIC_KEY }}
+  REP_URL: ${{ secrets.AWS_REP_URL }}
 
 jobs:
   deploy:
@@ -22,7 +23,7 @@ jobs:
       - name: Build, push docker image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: aws-deploy
+          REPOSITORY: vue-flask
           IMAGE_TAG: latest
         run: |-
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -41,9 +42,8 @@ jobs:
           envs: PRIVATE_SSH_KEY,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_DEFAULT_REGION,AWS_REGION
           script: |-
             sudo apt update
-            sudo apt install docker.io -y
             sudo apt install awscli -y
-            sudo $(aws ecr get-login --no-include-email --region ap-south-1);
+            sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REP_URL > /dev/null
             sudo docker stop myappcontainer || true
             sudo docker rm myappcontainer || true
             sudo docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
